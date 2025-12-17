@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import eventRoutes from './routes/events.js';
+import mediaRoutes from './routes/media.js';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/events', eventRoutes);
+app.use('/api/media', mediaRoutes);
 
 // Conectar a MongoDB
 mongoose
