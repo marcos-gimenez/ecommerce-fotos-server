@@ -7,7 +7,7 @@ const router = express.Router();
 // POST /api/media
 router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const { event } = req.body;
+    const { event, price } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ error: 'No se subió ningún archivo' });
@@ -15,13 +15,15 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     const media = await Media.create({
       event,
-      url: req.file.path,
-      type: 'image',
-      publicId: req.file.filename,
+      public_id: req.file.filename,
+      secure_url: req.file.path,
+      resource_type: req.file.mimetype.startsWith('video') ? 'video' : 'image',
+      price: price || 0,
     });
 
     res.status(201).json(media);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al subir media' });
   }
 });
