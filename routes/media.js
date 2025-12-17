@@ -28,4 +28,18 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+// GET /api/media?event=ID
+router.get('/', async (req, res) => {
+  try {
+    const { event } = req.query;
+
+    const filter = event ? { event } : {};
+    const media = await Media.find(filter).sort({ createdAt: -1 });
+
+    res.json(media);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener media' });
+  }
+});
+
 export default router;
