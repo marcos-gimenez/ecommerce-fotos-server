@@ -1,11 +1,11 @@
 import express from 'express';
-import mercadopago from 'mercadopago';
+import MercadoPago from 'mercadopago';
 import Order from '../models/Order.js';
 
 const router = express.Router();
 
-mercadopago.configure({
-  access_token: process.env.MP_ACCESS_TOKEN,
+const mpClient = new MercadoPago({
+  accessToken: process.env.MP_ACCESS_TOKEN,
 });
 
 /**
@@ -49,6 +49,7 @@ router.post('/preference', async (req, res) => {
       preferenceId: response.body.id,
     });
   } catch (error) {
+    console.error('MP error:', error);
     res.status(500).json({ error: 'Error creando preferencia MP' });
   }
 });
