@@ -62,31 +62,79 @@ router.post('/preference', async (req, res) => {
  * POST /api/payments/webhook
  * Webhook Mercado Pago
  */
+// router.post('/webhook', async (req, res) => {
+//   try {
+//     // MP envía el ID del pago por query
+//     const paymentId = req.query['data.id'];
+
+//     // Si no hay paymentId, respondemos OK
+//     if (!paymentId) {
+//       return res.sendStatus(200);
+//     }
+
+//     // Consultamos el pago real a MP
+//     const payment = await paymentClient.get({ id: paymentId });
+
+//     // Solo nos importa si está aprobado
+//     if (payment.status === 'approved') {
+//       const orderId = payment.metadata?.orderId;
+
+//       if (orderId) {
+//         await Order.findByIdAndUpdate(orderId, {
+//           status: 'paid',
+//         });
+//       }
+//     }
+
+//     // SIEMPRE responder 200
+//     res.sendStatus(200);
+//   } catch (error) {
+//     console.error('Webhook MP error:', error);
+//     res.sendStatus(200);
+//   }
+// });
+
 router.post('/webhook', async (req, res) => {
   try {
-    // MP envía el ID del pago por query
-    const paymentId = req.query['data.id'];
+    // 1 Filtrar solo eventos de pago
+    const topic = req.query.topic || req.query.type;
+    if (topic !== 'payment') return res.sendStatus(200);
 
-    // Si no hay paymentId, respondemos OK
-    if (!paymentId) {
+    // 2 Obtener paymentId
+    const paymentId = req.query['data.id'];
+    if (!paymentId) return res.sendStatus(200);
+
+    // 3 Consultar pago real a Mercado Pago
+    const payment = await paymentClient.get({ id: paymentId });
+    if (payment.status !== 'approved') return res.sendStatus(200);
+
+    // 4 Obtener orden asociada
+    const orderId = payment.metadata?.orderId;
+    if (!orderId) return res.sendStatus(200);
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.sendStatus(200);
+
+    // 5 Idempotencia (evitar reprocesar el mismo pago)
+    if (order.paymentId === payment.id) {
       return res.sendStatus(200);
     }
 
-    // Consultamos el pago real a MP
-    const payment = await paymentClient.get({ id: paymentId });
+    // 6 Validar monto (con tolerancia)
+    const sameAmount =
+      Math.abs(payment.transaction_amount - order.total) < 0.01;
 
-    // Solo nos importa si está aprobado
-    if (payment.status === 'approved') {
-      const orderId = payment.metadata?.orderId;
-
-      if (orderId) {
-        await Order.findByIdAndUpdate(orderId, {
-          status: 'paid',
-        });
-      }
+    if (!sameAmount) {
+      console.warn('⚠️ Monto no coincide');
+      return res.sendStatus(200);
     }
 
-    // SIEMPRE responder 200
+    // 7 Confirmar pago
+    order.status = 'paid';
+    order.paymentId = payment.id;
+    order.paidAt = new Date(payment.date_approved);
+    await order.save();
+
     res.sendStatus(200);
   } catch (error) {
     console.error('Webhook MP error:', error);
