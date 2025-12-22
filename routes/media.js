@@ -1,6 +1,7 @@
 import express from 'express';
 import Media from '../models/Media.js';
 import upload from '../middleware/upload.js';
+import cloudinary from '../config/cloudinary.js';
 
 const router = express.Router();
 
@@ -39,6 +40,29 @@ router.get('/', async (req, res) => {
     res.json(media);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener media' });
+  }
+});
+
+// DELETE /api/media/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.id);
+    if (!media) {
+      return res.status(404).json({ error: 'Media no encontrado' });
+    }
+
+    // Borrar de Cloudinary
+    await cloudinary.uploader.destroy(media.public_id, {
+      resource_type: media.resource_type,
+    });
+
+    // Borrar de Mongo
+    await media.deleteOne();
+
+    res.json({ message: 'Media eliminado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error eliminando media' });
   }
 });
 
