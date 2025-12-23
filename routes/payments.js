@@ -51,11 +51,11 @@ router.post('/preference', async (req, res) => {
     const preferenceBody = {
       items,
       back_urls: {
-        success: `http://localhost:5173/thanks/${order._id}`,
-        failure: `http://localhost:5173/thanks/${order._id}`,
-        pending: `http://localhost:5173/thanks/${order._id}`,
+        success: `${process.env.FRONT_URL}/thanks/${order._id}`,
+        failure: `${process.env.FRONT_URL}/thanks/${order._id}`,
+        pending: `${process.env.FRONT_URL}/thanks/${order._id}`,
       },
-      // auto_return: 'approved',
+      auto_return: 'approved',
       metadata: {
         orderId: order._id.toString(),
       },
