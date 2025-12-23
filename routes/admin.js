@@ -22,29 +22,4 @@ router.post('/login', async (req, res) => {
   res.json({ token });
 });
 
-// ⚠️ SOLO PARA CREAR EL PRIMER ADMIN - BORRAR DESPUÉS
-router.post('/create', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Faltan datos' });
-    }
-
-    const exists = await Admin.findOne({ email });
-    if (exists) {
-      return res.status(400).json({ error: 'Admin ya existe' });
-    }
-
-    const admin = new Admin({ email, password });
-    await admin.save(); // ← acá se hashea y se crea la colección
-
-    res.json({ ok: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error creando admin' });
-  }
-});
-
-
 export default router;
