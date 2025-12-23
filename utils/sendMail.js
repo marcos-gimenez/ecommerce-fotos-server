@@ -1,25 +1,17 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.MAIL_HOST,
-  port: process.env.MAIL_PORT,
-  secure: false,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOrderEmail({ to, orderId }) {
   const url = `${process.env.FRONT_URL}/thanks/${orderId}`;
 
-  await transporter.sendMail({
-    from: `"Tienda Fotos" <${process.env.MAIL_USER}>`,
+  await resend.emails.send({
+    from: 'Compras <onboarding@resend.dev>', // permitido sin dominio propio
     to,
     subject: 'Tu compra está lista',
     html: `
       <h2>Gracias por tu compra</h2>
-      <p>Tu pedido <strong>${orderId}</strong> fue confirmado.</p>
+      <p>Pedido <strong>${orderId}</strong></p>
       <p>
         Descargá tus archivos acá:<br/>
         <a href="${url}">${url}</a>

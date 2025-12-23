@@ -20,7 +20,8 @@
     "mongoose": "^9.0.1",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
-    "nodemailer": "^7.0.12"
+    "nodemailer": "^7.0.12",
+    "resend": "^6.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
