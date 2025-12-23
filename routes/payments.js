@@ -33,7 +33,7 @@ router.post('/preference', async (req, res) => {
       currency_id: 'ARS',
     }));
 
-    const preference = {
+    /* const preference = {
       items,
       back_urls: {
         success: `http://localhost:5173/thanks/${order._id}`,
@@ -46,7 +46,24 @@ router.post('/preference', async (req, res) => {
       },
     };
 
-    const response = await preferenceClient.create({ body: preference });
+    const response = await preferenceClient.create({ body: preference });*/
+
+    const preferenceBody = {
+      items,
+      back_urls: {
+        success: `http://localhost:5173/thanks/${order._id}`,
+        failure: `http://localhost:5173/thanks/${order._id}`,
+        pending: `http://localhost:5173/thanks/${order._id}`,
+      },
+      auto_return: 'approved',
+      metadata: {
+        orderId: order._id.toString(),
+      },
+    };
+
+    const response = await preferenceClient.create({
+      body: preferenceBody,
+    });
 
     res.json({
       init_point: response.init_point,
