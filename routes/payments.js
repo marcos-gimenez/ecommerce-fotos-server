@@ -36,9 +36,9 @@ router.post('/preference', async (req, res) => {
     const preference = {
       items,
       back_urls: {
-        success: 'https://TU_FRONT/thanks',
-        failure: 'https://TU_FRONT/error',
-        pending: 'https://TU_FRONT/pending',
+        success: `http://localhost:5173/thanks/${order._id}`,
+        failure: `http://localhost:5173/thanks/${order._id}`,
+        pending: `http://localhost:5173/thanks/${order._id}`,
       },
       auto_return: 'approved',
       metadata: {
@@ -62,37 +62,6 @@ router.post('/preference', async (req, res) => {
  * POST /api/payments/webhook
  * Webhook Mercado Pago
  */
-// router.post('/webhook', async (req, res) => {
-//   try {
-//     // MP envía el ID del pago por query
-//     const paymentId = req.query['data.id'];
-
-//     // Si no hay paymentId, respondemos OK
-//     if (!paymentId) {
-//       return res.sendStatus(200);
-//     }
-
-//     // Consultamos el pago real a MP
-//     const payment = await paymentClient.get({ id: paymentId });
-
-//     // Solo nos importa si está aprobado
-//     if (payment.status === 'approved') {
-//       const orderId = payment.metadata?.orderId;
-
-//       if (orderId) {
-//         await Order.findByIdAndUpdate(orderId, {
-//           status: 'paid',
-//         });
-//       }
-//     }
-
-//     // SIEMPRE responder 200
-//     res.sendStatus(200);
-//   } catch (error) {
-//     console.error('Webhook MP error:', error);
-//     res.sendStatus(200);
-//   }
-// });
 
 router.post('/webhook', async (req, res) => {
   try {
@@ -121,8 +90,7 @@ router.post('/webhook', async (req, res) => {
     }
 
     // 6 Validar monto (con tolerancia)
-    const sameAmount =
-      Math.abs(payment.transaction_amount - order.total) < 0.01;
+    const sameAmount = Math.abs(payment.transaction_amount - order.total) < 0.01;
 
     if (!sameAmount) {
       console.warn('⚠️ Monto no coincide');
@@ -141,8 +109,5 @@ router.post('/webhook', async (req, res) => {
     res.sendStatus(200);
   }
 });
-
-
-
 
 export default router;
