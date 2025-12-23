@@ -2,10 +2,12 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
 import eventRoutes from './routes/events.js';
 import mediaRoutes from './routes/media.js';
 import orderRoutes from './routes/orders.js';
 import paymentRoutes from './routes/payments.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -20,6 +22,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 
