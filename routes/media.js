@@ -2,11 +2,15 @@ import express from 'express';
 import Media from '../models/Media.js';
 import upload from '../middleware/upload.js';
 import cloudinary from '../config/cloudinary.js';
+import authAdmin from '../middleware/authAdmin.js';
 
 const router = express.Router();
 
+
+
 // POST /api/media
-router.post('/', upload.single('file'), async (req, res) => {
+
+router.post('/', authAdmin, upload.single('file'), async (req, res) => {
   try {
     const { event, price } = req.body;
 
@@ -44,7 +48,7 @@ router.get('/', async (req, res) => {
 });
 
 // DELETE /api/media/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authAdmin, async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
     if (!media) {
