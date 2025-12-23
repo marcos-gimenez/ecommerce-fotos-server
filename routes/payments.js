@@ -134,4 +134,23 @@ router.post('/webhook', async (req, res) => {
   }
 });
 
+// 🧪 SOLO PARA TEST DE EMAIL (DEV)
+router.post('/test-email/:orderId', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) return res.status(404).json({ error: 'Orden no encontrada' });
+
+    await sendOrderEmail({
+      to: order.email,
+      orderId: order._id.toString(),
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Test email error:', err);
+    res.status(500).json({ error: 'Error enviando email' });
+  }
+});
+
+
 export default router;
