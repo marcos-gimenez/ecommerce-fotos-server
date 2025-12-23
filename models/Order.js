@@ -1,17 +1,5 @@
 import mongoose from 'mongoose';
 
-// const OrderSchema = new mongoose.Schema({
-//   email: String,
-//   name: String,
-//   items: [
-//     { media: { type: mongoose.Schema.Types.ObjectId, ref: 'Media' }, price: Number },
-//   ],
-//   total: Number,
-//   status: { type: String, default: 'pending' }, // pendiente, pagado, cancelado
-//   paymentId: String,
-//   createdAt: { type: Date, default: Date.now },
-// });
-
 const OrderSchema = new mongoose.Schema({
   email: { type: String, required: true },
   name: { type: String, required: true },

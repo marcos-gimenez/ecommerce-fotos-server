@@ -11,6 +11,7 @@ const router = express.Router();
  */
 router.post('/', async (req, res) => {
   try {
+    console.log('BODY:', req.body);
     const { email, name, items } = req.body;
 
     if (!email || !name || !Array.isArray(items) || items.length === 0) {
@@ -67,45 +68,6 @@ router.get('/:id', async (req, res) => {
 /**
  * GET /api/orders/:id/thanks
  */
-// router.get('/:id/thanks', async (req, res) => {
-//   try {
-//     const order = await Order.findById(req.params.id)
-//       .populate('items.media');
-
-//     if (!order) {
-//       return res.status(404).json({ error: 'Orden no encontrada' });
-//     }
-
-//     if (order.status !== 'paid') {
-//       return res.status(403).json({ error: 'Orden no pagada' });
-//     }
-
-//     const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24h
-
-//     const downloads = order.items.map(({ media }) => {
-//       const url = cloudinary.url(media.public_id, {
-//         resource_type: media.resource_type,
-//         secure: true,
-//         sign_url: true,
-//         expires_at: expiresAt,
-//       });
-
-//       return {
-//         id: media._id,
-//         type: media.resource_type,
-//         url,
-//       };
-//     });
-
-//     res.json({
-//       orderId: order._id,
-//       email: order.email,
-//       downloads,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Error generando links' });
-//   }
-// });
 
 router.get('/:id/thanks', async (req, res) => {
   try {
