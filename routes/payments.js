@@ -55,7 +55,7 @@ router.post('/preference', async (req, res) => {
         failure: `http://localhost:5173/thanks/${order._id}`,
         pending: `http://localhost:5173/thanks/${order._id}`,
       },
-      auto_return: 'approved',
+      // auto_return: 'approved',
       metadata: {
         orderId: order._id.toString(),
       },
