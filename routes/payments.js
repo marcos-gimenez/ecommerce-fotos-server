@@ -1,6 +1,7 @@
 import express from 'express';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import Order from '../models/Order.js';
+import { sendOrderEmail } from '../utils/sendMail.js';
 
 const router = express.Router();
 
@@ -119,6 +120,12 @@ router.post('/webhook', async (req, res) => {
     order.paymentId = payment.id;
     order.paidAt = new Date(payment.date_approved);
     await order.save();
+
+    // 8 Enviar email de confirmación
+    await sendOrderEmail({
+      to: order.email,
+      orderId: order._id.toString(),
+    });
 
     res.sendStatus(200);
   } catch (error) {
