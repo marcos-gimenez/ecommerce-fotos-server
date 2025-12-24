@@ -10,28 +10,33 @@ const router = express.Router();
 
 // POST /api/media
 
-router.post('/', authAdmin, upload.single('file'), async (req, res) => {
+router.post('/', authAdmin, upload.array('files'), async (req, res) => {
   try {
     const { event, price } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'No se subió ningún archivo' });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No se subieron archivos' });
     }
 
-    const media = await Media.create({
-      event,
-      public_id: req.file.filename,
-      secure_url: req.file.path,
-      resource_type: req.file.mimetype.startsWith('video') ? 'video' : 'image',
-      price: price || 0,
-    });
+    const mediaDocs = await Promise.all(
+      req.files.map(file =>
+        Media.create({
+          event,
+          public_id: file.filename,
+          secure_url: file.path,
+          resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+          price: price || 0,
+        })
+      )
+    );
 
-    res.status(201).json(media);
+    res.status(201).json(mediaDocs);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al subir media' });
+    res.status(500).json({ error: 'Error en subida por lote' });
   }
 });
+
 
 // GET /api/media?event=ID
 router.get('/', async (req, res) => {

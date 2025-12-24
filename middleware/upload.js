@@ -4,9 +4,16 @@ import cloudinary from '../config/cloudinary.js';
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'events_media',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+  params: (req, file) => {
+    const isVideo = file.mimetype.startsWith('video');
+
+    return {
+      folder: 'events_media',
+      resource_type: isVideo ? 'video' : 'image',
+      allowed_formats: isVideo
+        ? ['mp4', 'mov', 'webm']
+        : ['jpg', 'jpeg', 'png', 'webp'],
+    };
   },
 });
 
