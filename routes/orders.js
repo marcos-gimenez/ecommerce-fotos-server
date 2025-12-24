@@ -2,6 +2,7 @@ import express from 'express';
 import Order from '../models/Order.js';
 import Media from '../models/Media.js';
 import cloudinary from '../config/cloudinary.js';
+import authAdmin from '../middleware/authAdmin.js';
 
 const router = express.Router();
 
@@ -114,6 +115,21 @@ router.get('/:id/thanks', async (req, res) => {
   } catch (error) {
     console.error('Error /thanks:', error);
     res.status(500).json({ error: 'Error generando links' });
+  }
+});
+
+/**
+ * GET /api/orders (ADMIN)
+ */
+router.get('/', authAdmin, async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate('items.media');
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: 'Error obteniendo ventas' });
   }
 });
 
