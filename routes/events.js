@@ -27,4 +27,30 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// PUT /api/events/:id/cover
+router.put('/:id/cover', async (req, res) => {
+  try {
+    const { coverImage } = req.body;
+
+    if (!coverImage) {
+      return res.status(400).json({ error: 'Falta coverImage' });
+    }
+
+    const event = await Event.findByIdAndUpdate(
+      req.params.id,
+      { coverImage },
+      { new: true }
+    );
+
+    if (!event) {
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    res.json(event);
+  } catch (err) {
+    res.status(500).json({ error: 'Error seteando portada' });
+  }
+});
+
+
 export default router;

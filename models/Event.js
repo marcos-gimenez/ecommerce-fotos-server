@@ -5,6 +5,9 @@ const EventSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   code: { type: String, unique: true }, // código único opcional
   description: String,
+  coverImage: {
+    type: String, // URL de Cloudinary
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
