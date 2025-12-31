@@ -8,18 +8,21 @@ export function getPreviewUrl(media) {
       { width: 1200, crop: 'limit', quality: 'auto:eco' },
 
       // 2️⃣ Blur fuerte (preview protegida)
-      { effect: 'blur:150' },
+      { effect: 'blur:350' },
 
-      // 3️⃣ Watermark
+      // Watermark en mosaico
       {
         overlay: 'image:watermark_pampa_foto',
-        gravity: 'center',
-        opacity: 35,
-        width: 500,
+        width: 300,
+        opacity: 45
       },
 
-      // 4️⃣ Aplicar overlay
-      { flags: 'layer_apply' },
+      // Repetir watermark (tile)
+      {
+        flags: 'layer_apply',
+        gravity: 'center',
+        effect: 'tile'
+      }
     ],
   });
 }
