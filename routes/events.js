@@ -1,6 +1,7 @@
 import express from 'express';
 import Event from '../models/Event.js';
 import Media from '../models/Media.js';
+import { getPreviewUrl } from '../utils/cloudinaryPreview.js';
 
 const router = express.Router();
 
@@ -18,6 +19,31 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    const media = await Media.find({ event: event._id });
+
+    const mediaWithPreview = media.map((m) => ({
+      ...m.toObject(),
+      preview_url: getPreviewUrl(m),
+      //  no exponemos secure_url original en frontend público
+    }));
+
+    res.json({
+      event,
+      media: mediaWithPreview,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener evento' });
+  }
+});
+
+/*router.get('/:id', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ error: 'Evento no encontrado' });
 
     const media = await Media.find({ event: event._id });
@@ -25,7 +51,9 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener evento' });
   }
-});
+});*/
+
+
 
 // PUT /api/events/:id/cover
 router.put('/:id/cover', async (req, res) => {
