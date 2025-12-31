@@ -2,24 +2,20 @@ import cloudinary from '../config/cloudinary.js';
 
 export function getPreviewUrl(media) {
   return cloudinary.url(media.public_id, {
-    resource_type: media.resource_type,
-    secure: true,
+    resource_type: 'image',
     transformation: [
-      // 1️⃣ Imagen base primero
-      { width: 1200, crop: 'limit', quality: 'auto:low' },
+      // 1️⃣ Imagen base
+      { width: 1200, crop: 'limit', quality: 'auto:eco' },
 
-      // 2️⃣ Oscurecer levemente (opcional pero recomendado)
-      { effect: 'brightness:-10' },
+      // 2️⃣ Blur fuerte (preview protegida)
+      { effect: 'blur:200' },
 
-      // 3️⃣ Marca de agua
+      // 3️⃣ Watermark
       {
-        overlay: {
-          public_id: 'watermark_pampa_foto', // 👈 tu watermark
-        },
-        opacity: 35,
-        width: '0.6',
+        overlay: 'image:watermark_pampa_foto',
         gravity: 'center',
-        crop: 'scale',
+        opacity: 35,
+        width: 400,
       },
 
       // 4️⃣ Aplicar overlay
