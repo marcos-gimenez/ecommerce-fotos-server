@@ -10,19 +10,16 @@ export function getPreviewUrl(media) {
       // 2️⃣ Blur fuerte (preview protegida)
       { effect: 'blur:350' },
 
-      // Watermark en mosaico
+      // 3️⃣ Watermark
       {
         overlay: 'image:watermark_pampa_foto',
-        width: 300,
-        opacity: 45
+        gravity: 'center',
+        opacity: 60,
+        width: 650,
       },
 
-      // Repetir watermark (tile)
-      {
-        flags: 'layer_apply',
-        gravity: 'center',
-        effect: 'tile'
-      }
+      // 4️⃣ Aplicar overlay
+      { flags: 'layer_apply' },
     ],
   });
 }
