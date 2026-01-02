@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import express from 'express';
 import Media from '../models/Media.js';
 import upload from '../middleware/upload.js';
@@ -8,11 +9,32 @@ const router = express.Router();
 
 
 
+// GET /api/media/folders?event=ID
+router.get('/folders', async (req, res) => {
+  try {
+    const { event } = req.query;
+
+    if (!event) {
+      return res.status(400).json({ error: 'Falta event' });
+    }
+
+    const folders = await Media.distinct('folder', {
+      event: new mongoose.Types.ObjectId(event),
+    });
+
+    res.json(folders.filter(Boolean));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error obteniendo carpetas' });
+  }
+});
+
+
 // POST /api/media
 
 router.post('/', authAdmin, upload.array('files'), async (req, res) => {
   try {
-    const { event, price } = req.body;
+    const { event, price, folder } = req.body;
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No se subieron archivos' });
@@ -22,6 +44,7 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
       req.files.map(file =>
         Media.create({
           event,
+          folder: folder || 'General', // 👈 acá
           public_id: file.filename,
           secure_url: file.path,
           resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
@@ -34,6 +57,47 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error en subida por lote' });
+  }
+});
+
+
+// router.post('/', authAdmin, upload.array('files'), async (req, res) => {
+//   try {
+//     const { event, price } = req.body;
+
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ error: 'No se subieron archivos' });
+//     }
+
+//     const mediaDocs = await Promise.all(
+//       req.files.map(file =>
+//         Media.create({
+//           event,
+//           public_id: file.filename,
+//           secure_url: file.path,
+//           resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+//           price: price || 0,
+//         })
+//       )
+//     );
+
+//     res.status(201).json(mediaDocs);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Error en subida por lote' });
+//   }
+// });
+
+// GET /api/media/folders?event=ID
+router.get('/folders', async (req, res) => {
+  try {
+    const { event } = req.query;
+    if (!event) return res.json([]);
+
+    const folders = await Media.distinct('folder', { event });
+    res.json(folders);
+  } catch (error) {
+    res.status(500).json({ error: 'Error obteniendo carpetas' });
   }
 });
 

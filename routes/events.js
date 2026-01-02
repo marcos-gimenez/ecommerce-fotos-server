@@ -2,6 +2,7 @@ import express from 'express';
 import Event from '../models/Event.js';
 import Media from '../models/Media.js';
 import { getPreviewUrl } from '../utils/cloudinaryPreview.js';
+import Folder from '../models/Folder.js';
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/events/:id → detalle de un evento + sus medios
+
 router.get('/:id', async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -23,17 +25,28 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Evento no encontrado' });
     }
 
+    const folders = await Folder.find({ event: event._id });
+
     const media = await Media.find({ event: event._id });
 
-    const mediaWithPreview = media.map((m) => ({
+    const mediaWithPreview = media.map(m => ({
       ...m.toObject(),
       preview_url: getPreviewUrl(m),
-      //  no exponemos secure_url original en frontend público
     }));
+
+    const foldersWithMedia = folders.map(folder => ({
+      ...folder.toObject(),
+      media: mediaWithPreview.filter(
+        m => m.folder?.toString() === folder._id.toString()
+      ),
+    }));
+
+    const generalMedia = mediaWithPreview.filter(m => !m.folder);
 
     res.json({
       event,
-      media: mediaWithPreview,
+      folders: foldersWithMedia,
+      media: generalMedia,
     });
   } catch (err) {
     console.error(err);
@@ -41,18 +54,31 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-/*router.get('/:id', async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ error: 'Evento no encontrado' });
 
-    const media = await Media.find({ event: event._id });
-    res.json({ event, media });
-  } catch (err) {
-    res.status(500).json({ error: 'Error al obtener evento' });
-  }
-});*/
+// router.get('/:id', async (req, res) => {
+//   try {
+//     const event = await Event.findById(req.params.id);
+//     if (!event) {
+//       return res.status(404).json({ error: 'Evento no encontrado' });
+//     }
 
+//     const media = await Media.find({ event: event._id });
+
+//     const mediaWithPreview = media.map((m) => ({
+//       ...m.toObject(),
+//       preview_url: getPreviewUrl(m),
+//       //  no exponemos secure_url original en frontend público
+//     }));
+
+//     res.json({
+//       event,
+//       media: mediaWithPreview,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Error al obtener evento' });
+//   }
+// });
 
 
 // PUT /api/events/:id/cover
