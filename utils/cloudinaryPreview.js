@@ -8,14 +8,14 @@ export function getPreviewUrl(media) {
       { width: 1200, crop: 'limit', quality: 'auto:eco' },
 
       // 2️⃣ Blur fuerte (preview protegida)
-      { effect: 'blur:350' },
+      { effect: 'blur:150' },
 
       // 3️⃣ Watermark
       {
         overlay: 'image:watermark_pampa_foto',
         gravity: 'center',
-        opacity: 60,
-        width: 650,
+        opacity: 90,
+        width: 950,
       },
 
       // 4️⃣ Aplicar overlay
