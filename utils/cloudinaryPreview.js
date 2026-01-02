@@ -42,7 +42,7 @@ export function getPreviewUrl(media) {
         width: '1.0',
         crop: 'scale',
         gravity: 'center',
-        opacity: 90,
+        opacity: 80,
       },
 
       // 4️⃣ Aplicar overlay
