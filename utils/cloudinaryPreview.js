@@ -34,7 +34,7 @@ export function getPreviewUrl(media) {
       { width: 1200, crop: 'limit', quality: 'auto:eco' },
 
       // 2️⃣ Blur fuerte (preview protegida)
-      { effect: 'blur:150' },
+      { effect: 'blur:100' },
 
       // 3️⃣ Watermark ocupando todo el ancho
       {
@@ -42,7 +42,7 @@ export function getPreviewUrl(media) {
         width: '1.0',
         crop: 'scale',
         gravity: 'center',
-        opacity: 80,
+        opacity: 70,
       },
 
       // 4️⃣ Aplicar overlay
