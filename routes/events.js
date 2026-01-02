@@ -2,7 +2,7 @@ import express from 'express';
 import Event from '../models/Event.js';
 import Media from '../models/Media.js';
 import { getPreviewUrl } from '../utils/cloudinaryPreview.js';
-import Folder from '../models/Folder.js';
+
 
 const router = express.Router();
 
@@ -25,8 +25,6 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Evento no encontrado' });
     }
 
-    const folders = await Folder.find({ event: event._id });
-
     const media = await Media.find({ event: event._id });
 
     const mediaWithPreview = media.map(m => ({
@@ -34,19 +32,9 @@ router.get('/:id', async (req, res) => {
       preview_url: getPreviewUrl(m),
     }));
 
-    const foldersWithMedia = folders.map(folder => ({
-      ...folder.toObject(),
-      media: mediaWithPreview.filter(
-        m => m.folder?.toString() === folder._id.toString()
-      ),
-    }));
-
-    const generalMedia = mediaWithPreview.filter(m => !m.folder);
-
     res.json({
       event,
-      folders: foldersWithMedia,
-      media: generalMedia,
+      media: mediaWithPreview,
     });
   } catch (err) {
     console.error(err);

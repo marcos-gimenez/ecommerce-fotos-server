@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import express from 'express';
 import Media from '../models/Media.js';
 import upload from '../middleware/upload.js';
@@ -13,18 +12,11 @@ const router = express.Router();
 router.get('/folders', async (req, res) => {
   try {
     const { event } = req.query;
+    if (!event) return res.json([]);
 
-    if (!event) {
-      return res.status(400).json({ error: 'Falta event' });
-    }
-
-    const folders = await Media.distinct('folder', {
-      event: new mongoose.Types.ObjectId(event),
-    });
-
+    const folders = await Media.distinct('folder', { event });
     res.json(folders.filter(Boolean));
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
     res.status(500).json({ error: 'Error obteniendo carpetas' });
   }
 });
@@ -44,7 +36,7 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
       req.files.map(file =>
         Media.create({
           event,
-          folder: folder || 'General', // 👈 acá
+          folder: folder || 'General',
           public_id: file.filename,
           secure_url: file.path,
           resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
@@ -89,27 +81,26 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
 // });
 
 // GET /api/media/folders?event=ID
-router.get('/folders', async (req, res) => {
-  try {
-    const { event } = req.query;
-    if (!event) return res.json([]);
+// router.get('/folders', async (req, res) => {
+//   try {
+//     const { event } = req.query;
+//     if (!event) return res.json([]);
 
-    const folders = await Media.distinct('folder', { event });
-    res.json(folders);
-  } catch (error) {
-    res.status(500).json({ error: 'Error obteniendo carpetas' });
-  }
-});
+//     const folders = await Media.distinct('folder', { event });
+//     res.json(folders);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Error obteniendo carpetas' });
+//   }
+// });
 
 
 // GET /api/media?event=ID
 router.get('/', async (req, res) => {
   try {
     const { event } = req.query;
-
     const filter = event ? { event } : {};
-    const media = await Media.find(filter).sort({ createdAt: -1 });
 
+    const media = await Media.find(filter).sort({ createdAt: -1 });
     res.json(media);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener media' });

@@ -17,7 +17,7 @@ import mongoose from 'mongoose';
 // });
 
 const MediaSchema = new mongoose.Schema({
-  event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
+  event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true,},
 
   folder: {
     type: String,
