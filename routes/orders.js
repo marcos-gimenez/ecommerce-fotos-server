@@ -84,15 +84,7 @@ router.get('/:id/thanks', async (req, res) => {
     const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24 horas
 
     const downloads = order.items.map(({ media }) => {
-      /*const extension = media.resource_type === 'video' ? 'mp4' : 'jpg';
-
-      const url = cloudinary.utils.private_download_url(
-        media.public_id,
-        extension,
-        {
-          expires_at: expiresAt,
-        }
-      );*/
+      
       const url = cloudinary.url(media.public_id, {
         resource_type: media.resource_type,
         secure: true,
@@ -130,6 +122,42 @@ router.get('/', authAdmin, async (req, res) => {
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: 'Error obteniendo ventas' });
+  }
+});
+
+/**
+ * GET /api/orders/:id/admin
+ * Detalle completo de una orden (ADMIN)
+ */
+router.get('/:id/admin', authAdmin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('items.media');
+
+    if (!order) {
+      return res.status(404).json({ error: 'Orden no encontrada' });
+    }
+
+    res.json({
+      id: order._id,
+      email: order.email,
+      name: order.name,
+      status: order.status,
+      total: order.total,
+      paymentId: order.paymentId,
+      createdAt: order.createdAt,
+      paidAt: order.paidAt,
+      items: order.items.map(i => ({
+        id: i.media._id,
+        type: i.media.resource_type,
+        folder: i.media.folder,
+        price: i.price,
+        preview: i.media.secure_url,
+      })),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error obteniendo detalle de venta' });
   }
 });
 
