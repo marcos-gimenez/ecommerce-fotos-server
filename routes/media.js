@@ -126,4 +126,29 @@ router.delete('/:id', authAdmin, async (req, res) => {
   }
 });
 
+/**
+ * PUT /api/media/:id
+ * Editar media (ADMIN)
+ */
+router.put('/:id', authAdmin, async (req, res) => {
+  try {
+    const { price, folder } = req.body;
+
+    const media = await Media.findByIdAndUpdate(
+      req.params.id,
+      { price, folder },
+      { new: true }
+    );
+
+    if (!media) {
+      return res.status(404).json({ error: 'Media no encontrada' });
+    }
+
+    res.json(media);
+  } catch (error) {
+    res.status(500).json({ error: 'Error editando media' });
+  }
+});
+
+
 export default router;

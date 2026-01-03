@@ -6,6 +6,8 @@ import authAdmin from '../middleware/authAdmin.js';
 import cloudinary from '../config/cloudinary.js';
 
 
+
+
 const router = express.Router();
 
 // GET /api/events → todos los eventos
@@ -108,5 +110,56 @@ router.delete('/:id', authAdmin, async (req, res) => {
     res.status(500).json({ error: 'Error eliminando evento' });
   }
 });
+
+/**
+ * POST /api/events
+ * Crear evento (ADMIN)
+ */
+router.post('/', authAdmin, async (req, res) => {
+  try {
+    const { title, date, description } = req.body;
+
+    if (!title || !date) {
+      return res.status(400).json({ error: 'Faltan datos' });
+    }
+
+    const event = await Event.create({
+      title,
+      date,
+      description,
+    });
+
+    res.status(201).json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error creando evento' });
+  }
+});
+
+/**
+ * PUT /api/events/:id
+ * Editar evento (ADMIN)
+ */
+router.put('/:id', authAdmin, async (req, res) => {
+  try {
+    const { title, date, description } = req.body;
+
+    const event = await Event.findByIdAndUpdate(
+      req.params.id,
+      { title, date, description },
+      { new: true }
+    );
+
+    if (!event) {
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: 'Error editando evento' });
+  }
+});
+
+
 
 export default router;
