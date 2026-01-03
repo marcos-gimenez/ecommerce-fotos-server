@@ -2,6 +2,8 @@ import express from 'express';
 import Event from '../models/Event.js';
 import Media from '../models/Media.js';
 import { getPreviewUrl } from '../utils/cloudinaryPreview.js';
+import authAdmin from '../middleware/authAdmin.js';
+import cloudinary from '../config/cloudinary.js';
 
 
 const router = express.Router();
@@ -68,5 +70,43 @@ router.put('/:id/cover', async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/events/:id
+ * Eliminar evento + media asociada (ADMIN)
+ */
+router.delete('/:id', authAdmin, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+
+    // 1️⃣ Buscar evento
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    // 2️⃣ Buscar media asociada
+    const mediaList = await Media.find({ event: eventId });
+
+    // 3️⃣ Borrar assets en Cloudinary
+    await Promise.all(
+      mediaList.map(m =>
+        cloudinary.uploader.destroy(m.public_id, {
+          resource_type: m.resource_type,
+        })
+      )
+    );
+
+    // 4️⃣ Borrar media de Mongo
+    await Media.deleteMany({ event: eventId });
+
+    // 5️⃣ Borrar evento
+    await event.deleteOne();
+
+    res.json({ message: 'Evento eliminado correctamente' });
+  } catch (error) {
+    console.error('Error eliminando evento:', error);
+    res.status(500).json({ error: 'Error eliminando evento' });
+  }
+});
 
 export default router;
