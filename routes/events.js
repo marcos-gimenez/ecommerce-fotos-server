@@ -5,9 +5,6 @@ import { getPreviewUrl } from '../utils/cloudinaryPreview.js';
 import authAdmin from '../middleware/authAdmin.js';
 import cloudinary from '../config/cloudinary.js';
 
-
-
-
 const router = express.Router();
 
 // GET /api/events → todos los eventos
@@ -31,9 +28,11 @@ router.get('/:id', async (req, res) => {
 
     const media = await Media.find({ event: event._id });
 
-    const mediaWithPreview = media.map(m => ({
+    const mediaWithPreview = media.map((m) => ({
       ...m.toObject(),
       preview_url: getPreviewUrl(m),
+      width: m.width,
+      height: m.height,
     }));
 
     res.json({
@@ -46,7 +45,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
 // PUT /api/events/:id/cover
 router.put('/:id/cover', async (req, res) => {
   try {
@@ -56,11 +54,7 @@ router.put('/:id/cover', async (req, res) => {
       return res.status(400).json({ error: 'Falta coverImage' });
     }
 
-    const event = await Event.findByIdAndUpdate(
-      req.params.id,
-      { coverImage },
-      { new: true }
-    );
+    const event = await Event.findByIdAndUpdate(req.params.id, { coverImage }, { new: true });
 
     if (!event) {
       return res.status(404).json({ error: 'Evento no encontrado' });
@@ -91,11 +85,11 @@ router.delete('/:id', authAdmin, async (req, res) => {
 
     // 3️⃣ Borrar assets en Cloudinary
     await Promise.all(
-      mediaList.map(m =>
+      mediaList.map((m) =>
         cloudinary.uploader.destroy(m.public_id, {
           resource_type: m.resource_type,
-        })
-      )
+        }),
+      ),
     );
 
     // 4️⃣ Borrar media de Mongo
@@ -147,7 +141,7 @@ router.put('/:id', authAdmin, async (req, res) => {
     const event = await Event.findByIdAndUpdate(
       req.params.id,
       { title, date, description },
-      { new: true }
+      { new: true },
     );
 
     if (!event) {
@@ -159,7 +153,5 @@ router.put('/:id', authAdmin, async (req, res) => {
     res.status(500).json({ error: 'Error editando evento' });
   }
 });
-
-
 
 export default router;

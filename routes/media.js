@@ -46,8 +46,8 @@ router.delete('/folder', authAdmin, async (req, res) => {
       mediaList.map((m) =>
         cloudinary.uploader.destroy(m.public_id, {
           resource_type: m.resource_type,
-        })
-      )
+        }),
+      ),
     );
 
     // Borrar Mongo
@@ -72,7 +72,7 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
     }
 
     const mediaDocs = await Promise.all(
-      req.files.map(file =>
+      req.files.map((file) =>
         Media.create({
           event,
           folder: folder || 'General',
@@ -80,8 +80,11 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
           secure_url: file.path,
           resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
           price: price || 0,
-        })
-      )
+          width: file.width,
+          height: file.height,
+          format: file.format,
+        }),
+      ),
     );
 
     res.status(201).json(mediaDocs);
@@ -134,11 +137,7 @@ router.put('/:id', authAdmin, async (req, res) => {
   try {
     const { price, folder } = req.body;
 
-    const media = await Media.findByIdAndUpdate(
-      req.params.id,
-      { price, folder },
-      { new: true }
-    );
+    const media = await Media.findByIdAndUpdate(req.params.id, { price, folder }, { new: true });
 
     if (!media) {
       return res.status(404).json({ error: 'Media no encontrada' });
@@ -149,6 +148,5 @@ router.put('/:id', authAdmin, async (req, res) => {
     res.status(500).json({ error: 'Error editando media' });
   }
 });
-
 
 export default router;
