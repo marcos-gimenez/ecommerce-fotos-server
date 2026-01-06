@@ -76,14 +76,22 @@ router.post('/preference', async (req, res) => {
 
 router.post('/webhook', async (req, res) => {
   try {
-    // 🔎 Mercado Pago puede mandar por query o por body
-    const topic = req.query.topic || req.query.type || req.body.type || req.body.topic;
+    // 🔔 Logs crudos (dejarlos hasta que todo funcione)
+    console.log('📩 Webhook RAW body:', JSON.stringify(req.body));
+    console.log('📩 Webhook RAW query:', req.query);
 
-    if (topic !== 'payment') {
+    // 1️⃣ Aceptar SOLO eventos de pago (prod + test)
+    const isPaymentEvent =
+      req.query.type === 'payment' ||
+      req.query.topic === 'payment' ||
+      req.body?.action === 'payment.updated';
+
+    if (!isPaymentEvent) {
       return res.sendStatus(200);
     }
 
-    const paymentId = req.query['data.id'] || req.body?.data?.id || req.body?.id;
+    // 2️⃣ Obtener paymentId (prod + test)
+    const paymentId = req.query['data.id'] || req.body?.data?.id;
 
     if (!paymentId) {
       console.warn('⚠️ Webhook sin paymentId');
@@ -92,7 +100,7 @@ router.post('/webhook', async (req, res) => {
 
     console.log('🔔 Webhook recibido | paymentId:', paymentId);
 
-    // 1️⃣ Consultar pago real
+    // 3️⃣ Consultar pago real
     const payment = await paymentClient.get({ id: paymentId });
 
     if (payment.status !== 'approved') {
@@ -100,7 +108,7 @@ router.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // 2️⃣ Obtener orderId
+    // 4️⃣ Obtener orderId (metadata + backup)
     const orderId = payment.metadata?.orderId || payment.additional_info?.order_id;
 
     if (!orderId) {
@@ -108,25 +116,20 @@ router.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // const orderId = payment.metadata?.orderId;
-    // if (!orderId) {
-    //   console.warn('⚠️ Pago sin orderId en metadata');
-    //   return res.sendStatus(200);
-    // }
-
+    // 5️⃣ Buscar orden
     const order = await Order.findById(orderId);
     if (!order) {
       console.warn('⚠️ Orden no encontrada:', orderId);
       return res.sendStatus(200);
     }
 
-    // 3️⃣ Idempotencia
+    // 6️⃣ Idempotencia
     if (order.paymentId === payment.id) {
       console.log('ℹ️ Pago ya procesado');
       return res.sendStatus(200);
     }
 
-    // 4️⃣ Validar monto
+    // 7️⃣ Validar monto
     const sameAmount = Math.abs(payment.transaction_amount - order.total) < 0.01;
 
     if (!sameAmount) {
@@ -134,7 +137,7 @@ router.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // 5️⃣ Confirmar pago
+    // 8️⃣ Confirmar pago
     order.status = 'paid';
     order.paymentId = payment.id;
     order.paidAt = new Date(payment.date_approved);
@@ -142,16 +145,15 @@ router.post('/webhook', async (req, res) => {
 
     console.log('✅ Orden marcada como PAID:', order._id);
 
-    // 6️⃣ Email
+    // 9️⃣ Email
     await sendOrderEmail({
       to: order.email,
       orderId: order._id.toString(),
     });
 
-    // 7️⃣ WhatsApp (placeholder)
+    // 🔜 WhatsApp (luego)
     if (order.phone) {
       console.log(`📲 WhatsApp pendiente → ${order.phone}`);
-      // sendWhatsAppMessage(...)
     }
 
     return res.sendStatus(200);
