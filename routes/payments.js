@@ -68,62 +68,95 @@ router.post('/preference', async (req, res) => {
 
 router.post('/webhook', async (req, res) => {
   try {
-    // 1 Filtrar solo eventos de pago
-    const topic = req.query.topic || req.query.type;
-    if (topic !== 'payment') return res.sendStatus(200);
+    // 🔎 Mercado Pago puede mandar por query o por body
+    const topic =
+      req.query.topic ||
+      req.query.type ||
+      req.body.type ||
+      req.body.topic;
 
-    // 2 Obtener paymentId
-    const paymentId = req.query['data.id'];
-    if (!paymentId) return res.sendStatus(200);
+    if (topic !== 'payment') {
+      return res.sendStatus(200);
+    }
 
-    // 3 Consultar pago real a Mercado Pago
+    const paymentId =
+      req.query['data.id'] ||
+      req.body?.data?.id ||
+      req.body?.id;
+
+    if (!paymentId) {
+      console.warn('⚠️ Webhook sin paymentId');
+      return res.sendStatus(200);
+    }
+
+    console.log('🔔 Webhook recibido | paymentId:', paymentId);
+
+    // 1️⃣ Consultar pago real
     const payment = await paymentClient.get({ id: paymentId });
-    if (payment.status !== 'approved') return res.sendStatus(200);
 
-    // 4 Obtener orden asociada
+    if (payment.status !== 'approved') {
+      console.log('⏳ Pago no aprobado:', payment.status);
+      return res.sendStatus(200);
+    }
+
+    // 2️⃣ Obtener orderId
     const orderId = payment.metadata?.orderId;
-    if (!orderId) return res.sendStatus(200);
+    if (!orderId) {
+      console.warn('⚠️ Pago sin orderId en metadata');
+      return res.sendStatus(200);
+    }
 
     const order = await Order.findById(orderId);
-    if (!order) return res.sendStatus(200);
-
-    // 5 Idempotencia (evitar reprocesar el mismo pago)
-    if (order.paymentId === payment.id) {
+    if (!order) {
+      console.warn('⚠️ Orden no encontrada:', orderId);
       return res.sendStatus(200);
     }
 
-    // 6 Validar monto (con tolerancia)
-    const sameAmount = Math.abs(payment.transaction_amount - order.total) < 0.01;
+    // 3️⃣ Idempotencia
+    if (order.paymentId === payment.id) {
+      console.log('ℹ️ Pago ya procesado');
+      return res.sendStatus(200);
+    }
+
+    // 4️⃣ Validar monto
+    const sameAmount =
+      Math.abs(payment.transaction_amount - order.total) < 0.01;
 
     if (!sameAmount) {
-      console.warn('⚠️ Monto no coincide');
+      console.warn(
+        '⚠️ Monto no coincide',
+        payment.transaction_amount,
+        order.total
+      );
       return res.sendStatus(200);
     }
 
-    // 7 Confirmar pago
+    // 5️⃣ Confirmar pago
     order.status = 'paid';
     order.paymentId = payment.id;
     order.paidAt = new Date(payment.date_approved);
     await order.save();
 
-    // 8 Enviar email de confirmación
+    console.log('✅ Orden marcada como PAID:', order._id);
+
+    // 6️⃣ Email
     await sendOrderEmail({
       to: order.email,
       orderId: order._id.toString(),
     });
 
+    // 7️⃣ WhatsApp (placeholder)
     if (order.phone) {
-      console.log(`📲 WhatsApp pendiente → ${order.phone} | Order ${order._id}`);
-
-      // ACÁ va la llamada real a WhatsApp Cloud API
-      // sendWhatsAppMessage({ phone: order.phone, orderId: order._id })
+      console.log(`📲 WhatsApp pendiente → ${order.phone}`);
+      // sendWhatsAppMessage(...)
     }
 
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (error) {
-    console.error('Webhook MP error:', error);
-    res.sendStatus(200);
+    console.error('❌ Webhook MP error:', error);
+    return res.sendStatus(200);
   }
 });
+
 
 export default router;
