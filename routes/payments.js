@@ -37,6 +37,8 @@ router.post('/preference', async (req, res) => {
     const preferenceBody = {
       items,
 
+      external_reference: order._id.toString(), // 👈 CLAVE
+
       back_urls: {
         success: `${process.env.FRONT_URL}/thanks/${order._id}`,
         failure: `${process.env.FRONT_URL}/thanks/${order._id}`,
@@ -46,13 +48,13 @@ router.post('/preference', async (req, res) => {
 
       notification_url: `${process.env.BACK_URL}/api/payments/webhook`,
 
-      metadata: {
-        orderId: order._id.toString(),
-      },
+      // metadata: {
+      //   orderId: order._id.toString(),
+      // },
 
-      additional_info: {
-        order_id: order._id.toString(),
-      },
+      // additional_info: {
+      //   order_id: order._id.toString(),
+      // },
     };
 
     const response = await preferenceClient.create({
@@ -109,10 +111,10 @@ router.post('/webhook', async (req, res) => {
     }
 
     // 4️⃣ Obtener orderId (metadata + backup)
-    const orderId = payment.metadata?.orderId || payment.additional_info?.order_id;
+    const orderId = payment.external_reference;
 
     if (!orderId) {
-      console.warn('⚠️ Pago sin orderId en metadata ni additional_info');
+      console.warn('⚠️ Pago sin external_reference');
       return res.sendStatus(200);
     }
 
