@@ -255,6 +255,7 @@ router.get('/:id/thanks', async (req, res) => {
         secure: true,
         sign_url: true,
         expires_at: expiresAt,
+        flags: 'attachment',
       });
 
       return {
