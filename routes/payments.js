@@ -34,21 +34,6 @@ router.post('/preference', async (req, res) => {
       currency_id: 'ARS',
     }));
 
-    /* const preference = {
-      items,
-      back_urls: {
-        success: `http://localhost:5173/thanks/${order._id}`,
-        failure: `http://localhost:5173/thanks/${order._id}`,
-        pending: `http://localhost:5173/thanks/${order._id}`,
-      },
-      auto_return: 'approved',
-      metadata: {
-        orderId: order._id.toString(),
-      },
-    };
-
-    const response = await preferenceClient.create({ body: preference });*/
-
     const preferenceBody = {
       items,
       back_urls: {
@@ -126,6 +111,13 @@ router.post('/webhook', async (req, res) => {
       to: order.email,
       orderId: order._id.toString(),
     });
+
+    if (order.phone) {
+      console.log(`📲 WhatsApp pendiente → ${order.phone} | Order ${order._id}`);
+
+      // ACÁ va la llamada real a WhatsApp Cloud API
+      // sendWhatsAppMessage({ phone: order.phone, orderId: order._id })
+    }
 
     res.sendStatus(200);
   } catch (error) {
