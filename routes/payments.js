@@ -36,14 +36,22 @@ router.post('/preference', async (req, res) => {
 
     const preferenceBody = {
       items,
+
       back_urls: {
         success: `${process.env.FRONT_URL}/thanks/${order._id}`,
         failure: `${process.env.FRONT_URL}/thanks/${order._id}`,
         pending: `${process.env.FRONT_URL}/thanks/${order._id}`,
       },
       auto_return: 'approved',
+
+      notification_url: `${process.env.BACK_URL}/api/payments/webhook`,
+
       metadata: {
         orderId: order._id.toString(),
+      },
+
+      additional_info: {
+        order_id: order._id.toString(),
       },
     };
 
@@ -69,20 +77,13 @@ router.post('/preference', async (req, res) => {
 router.post('/webhook', async (req, res) => {
   try {
     // 🔎 Mercado Pago puede mandar por query o por body
-    const topic =
-      req.query.topic ||
-      req.query.type ||
-      req.body.type ||
-      req.body.topic;
+    const topic = req.query.topic || req.query.type || req.body.type || req.body.topic;
 
     if (topic !== 'payment') {
       return res.sendStatus(200);
     }
 
-    const paymentId =
-      req.query['data.id'] ||
-      req.body?.data?.id ||
-      req.body?.id;
+    const paymentId = req.query['data.id'] || req.body?.data?.id || req.body?.id;
 
     if (!paymentId) {
       console.warn('⚠️ Webhook sin paymentId');
@@ -100,11 +101,18 @@ router.post('/webhook', async (req, res) => {
     }
 
     // 2️⃣ Obtener orderId
-    const orderId = payment.metadata?.orderId;
+    const orderId = payment.metadata?.orderId || payment.additional_info?.order_id;
+
     if (!orderId) {
-      console.warn('⚠️ Pago sin orderId en metadata');
+      console.warn('⚠️ Pago sin orderId en metadata ni additional_info');
       return res.sendStatus(200);
     }
+
+    // const orderId = payment.metadata?.orderId;
+    // if (!orderId) {
+    //   console.warn('⚠️ Pago sin orderId en metadata');
+    //   return res.sendStatus(200);
+    // }
 
     const order = await Order.findById(orderId);
     if (!order) {
@@ -119,15 +127,10 @@ router.post('/webhook', async (req, res) => {
     }
 
     // 4️⃣ Validar monto
-    const sameAmount =
-      Math.abs(payment.transaction_amount - order.total) < 0.01;
+    const sameAmount = Math.abs(payment.transaction_amount - order.total) < 0.01;
 
     if (!sameAmount) {
-      console.warn(
-        '⚠️ Monto no coincide',
-        payment.transaction_amount,
-        order.total
-      );
+      console.warn('⚠️ Monto no coincide', payment.transaction_amount, order.total);
       return res.sendStatus(200);
     }
 
@@ -157,6 +160,5 @@ router.post('/webhook', async (req, res) => {
     return res.sendStatus(200);
   }
 });
-
 
 export default router;
