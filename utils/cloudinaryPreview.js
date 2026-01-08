@@ -98,22 +98,50 @@
 //   });
 // }
 
+// import cloudinary from '../config/cloudinary.js';
+
+// export function getPreviewUrl(media) {
+//   return cloudinary.url(media.public_id, {
+//     resource_type: 'image',
+//     transformation: [
+//       // 1️⃣ Imagen base
+//       { width: 1200, crop: 'limit', quality: 'auto:eco' },
+
+//       // 2️⃣ Blur fuerte
+//       { effect: 'blur:120' },
+
+//       // 3️⃣ Watermark REAL (no dependiente de orientación)
+//       {
+//         overlay: 'image:pampa_foto',
+//         width: 800,              // tamaño fijo, no relativo
+//         crop: 'scale',
+//         gravity: 'center',
+//         opacity: 38,
+//       },
+//       { flags: 'layer_apply' },
+
+//       // 4️⃣ Oscurecer levemente
+//       { effect: 'brightness:-10' },
+//     ],
+//   });
+// }
+
 import cloudinary from '../config/cloudinary.js';
 
 export function getPreviewUrl(media) {
   return cloudinary.url(media.public_id, {
     resource_type: 'image',
     transformation: [
-      // 1️⃣ Imagen base
+      // 1️⃣ Imagen base (preview liviana)
       { width: 1200, crop: 'limit', quality: 'auto:eco' },
 
-      // 2️⃣ Blur fuerte
+      // 2️⃣ Blur fuerte (protección real)
       { effect: 'blur:120' },
 
-      // 3️⃣ Watermark REAL (no dependiente de orientación)
+      // 3️⃣ Watermark FULL COVER (canvas 3000x3000)
       {
-        overlay: 'image:pampa_foto',
-        width: 800,              // tamaño fijo, no relativo
+        overlay: 'image:pampa_foto', // tu PNG 3000x3000
+        width: '1.0',               // 👈 ocupa todo el ancho
         crop: 'scale',
         gravity: 'center',
         opacity: 38,
@@ -125,4 +153,3 @@ export function getPreviewUrl(media) {
     ],
   });
 }
-
