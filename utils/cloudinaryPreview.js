@@ -83,7 +83,7 @@ export function getPreviewUrl(media) {
 
       // 3️⃣ Watermark en mosaico (LEGACY, PERO ESTABLE)
       {
-        overlay: 'pampa_foto',   // 👈 public_id SIMPLE
+        overlay: 'image:pampa_foto',   // 👈 public_id SIMPLE
         width: 300,              // tamaño del tile
         crop: 'scale',
         opacity: 25,
