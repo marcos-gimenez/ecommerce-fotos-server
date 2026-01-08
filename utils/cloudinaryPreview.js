@@ -80,21 +80,49 @@ export function getPreviewUrl(media) {
       // 2️⃣ Blur fuerte (preview protegida)
       { effect: 'blur:100' },
 
-      // 3️⃣ Watermark ocupando todo el ancho
-      {
-        overlay: 'image:watermark_pampa_foto',
-        width: 280,
-        crop: 'scale',
-        opacity: 35,
-        // flags: 'tile',
-      },
-
+      // // 3️⃣ Watermark ocupando todo el ancho
       // {
-      //   flags: 'tile',
+      //   overlay: 'image:watermark_pampa_foto',
+      //   width: 280,
+      //   crop: 'scale',
+      //   opacity: 35,
+        
       // },
 
-      // 4️⃣ Aplicar overlay
-      { flags: 'layer_apply' },
+      
+
+      // // 4️⃣ Aplicar overlay
+      // { flags: 'layer_apply' },
+
+      // watermark centro
+{
+  overlay: 'image:watermark_pampa_foto',
+  width: 280,
+  crop: 'scale',
+  opacity: 30,
+  gravity: 'center',
+},
+{ flags: 'layer_apply' },
+
+// watermark arriba izquierda
+{
+  overlay: 'image:watermark_pampa_foto',
+  width: 220,
+  crop: 'scale',
+  opacity: 20,
+  gravity: 'north_west',
+},
+{ flags: 'layer_apply' },
+
+// watermark abajo derecha
+{
+  overlay: 'image:watermark_pampa_foto',
+  width: 220,
+  crop: 'scale',
+  opacity: 20,
+  gravity: 'south_east',
+},
+{ flags: 'layer_apply' },
 
       // 5️⃣ Oscurecer levemente la imagen final
       { effect: 'brightness:-10' },
