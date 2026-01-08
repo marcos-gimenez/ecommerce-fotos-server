@@ -86,6 +86,10 @@ export function getPreviewUrl(media) {
         width: 280,
         crop: 'scale',
         opacity: 35,
+        // flags: 'tile',
+      },
+
+      {
         flags: 'tile',
       },
 
