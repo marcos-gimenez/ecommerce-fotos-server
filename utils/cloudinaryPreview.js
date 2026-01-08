@@ -47,7 +47,7 @@ export function getPreviewUrl(media) {
 
       // 2️⃣ Watermark en mosaico (NO se puede escapar)
       {
-        overlay: 'watermarks/pampa_foto', // 👈 public_id
+        overlay: 'pampa_foto', // 👈 public_id
         width: 320,
         crop: 'scale',
         opacity: 22,
