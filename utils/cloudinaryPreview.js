@@ -30,22 +30,68 @@
 
 import cloudinary from '../config/cloudinary.js';
 
-export function getPreviewUrl(media) {
-  const isVideo = media.resource_type === 'video';
+// export function getPreviewUrl(media) {
+//   const isVideo = media.resource_type === 'video';
 
+//   return cloudinary.url(media.public_id, {
+//     resource_type: isVideo ? 'video' : 'image',
+//     secure: true,
+//     transformation: [
+//       // 1️⃣ Base
+//       {
+//         width: 1600,
+//         height: 1600,
+//         crop: 'limit',
+//         quality: 'auto',
+//       },
+
+//       // 2️⃣ Definís el overlay
+//       {
+//         overlay: {
+//           public_id: 'pampa_foto',
+//           resource_type: 'image',
+//         },
+//         width: 320,
+//         crop: 'scale',
+//         opacity: 22,
+//         flags: 'tile',
+//       },
+
+//       // 3️⃣ Aplicás el overlay (ESTO FALTABA)
+//       {
+//         flags: 'layer_apply',
+//       },
+
+//       // 4️⃣ Ajuste final
+//       { effect: 'brightness:-5' },
+//     ],
+//   });
+// }
+
+export function getPreviewUrl(media) {
+  if (media.resource_type !== 'image') {
+    // 🔕 No intentamos preview protegido para video
+    return cloudinary.url(media.public_id, {
+      resource_type: 'video',
+      format: 'jpg',
+      secure: true,
+      transformation: [
+        { width: 1600, height: 1600, crop: 'limit' },
+      ],
+    });
+  }
+
+  // ✅ IMÁGENES
   return cloudinary.url(media.public_id, {
-    resource_type: isVideo ? 'video' : 'image',
+    resource_type: 'image',
     secure: true,
     transformation: [
-      // 1️⃣ Base
       {
         width: 1600,
         height: 1600,
         crop: 'limit',
         quality: 'auto',
       },
-
-      // 2️⃣ Definís el overlay
       {
         overlay: {
           public_id: 'pampa_foto',
@@ -56,13 +102,7 @@ export function getPreviewUrl(media) {
         opacity: 22,
         flags: 'tile',
       },
-
-      // 3️⃣ Aplicás el overlay (ESTO FALTABA)
-      {
-        flags: 'layer_apply',
-      },
-
-      // 4️⃣ Ajuste final
+      { flags: 'layer_apply' },
       { effect: 'brightness:-5' },
     ],
   });
