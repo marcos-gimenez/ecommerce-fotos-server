@@ -100,35 +100,6 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
     res.status(500).json({ error: 'Error subiendo media' });
   }
 });
-// router.post('/', authAdmin, upload.array('files'), async (req, res) => {
-//   try {
-//     const { event, price, folder } = req.body;
-
-//     if (!req.files || req.files.length === 0) {
-//       return res.status(400).json({ error: 'No se subieron archivos' });
-//     }
-
-//     const mediaDocs = await Promise.all(
-//       req.files.map((file) =>
-//         Media.create({
-//           event,
-//           folder: folder || 'General',
-//           public_id: file.filename,
-//           secure_url: file.path,
-//           resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
-//           price: price || 0,
-//           width: file.width,
-//           height: file.height,
-//           format: file.format,
-//         }),
-//       ),
-//     );
-
-//     res.status(201).json(mediaDocs);
-//   } catch {
-//     res.status(500).json({ error: 'Error subiendo media' });
-//   }
-// });
 
 // ===============================
 // GET media
