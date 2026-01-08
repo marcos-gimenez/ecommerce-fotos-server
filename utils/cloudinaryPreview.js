@@ -142,7 +142,7 @@ export function getPreviewUrl(media) {
       {
         overlay: 'image:pampa_foto', // tu PNG 3000x3000
         width: '1.0',               // 👈 ocupa todo el ancho
-        crop: 'scale',
+        crop: 'fill',
         gravity: 'center',
         opacity: 38,
       },
