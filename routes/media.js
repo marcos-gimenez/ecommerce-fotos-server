@@ -72,26 +72,63 @@ router.post('/', authAdmin, upload.array('files'), async (req, res) => {
     }
 
     const mediaDocs = await Promise.all(
-      req.files.map((file) =>
-        Media.create({
+      req.files.map(async (file) => {
+        // 🔍 Obtener metadata REAL desde Cloudinary
+        const info = await cloudinary.api.resource(file.filename, {
+          resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+        });
+
+        return Media.create({
           event,
           folder: folder || 'General',
           public_id: file.filename,
           secure_url: file.path,
-          resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+          resource_type: info.resource_type,
           price: price || 0,
-          width: file.width,
-          height: file.height,
-          format: file.format,
-        }),
-      ),
+
+          // ✅ AHORA SÍ existen
+          width: info.width,
+          height: info.height,
+          format: info.format,
+        });
+      })
     );
 
     res.status(201).json(mediaDocs);
-  } catch {
+  } catch (error) {
+    console.error('Error subiendo media:', error);
     res.status(500).json({ error: 'Error subiendo media' });
   }
 });
+// router.post('/', authAdmin, upload.array('files'), async (req, res) => {
+//   try {
+//     const { event, price, folder } = req.body;
+
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ error: 'No se subieron archivos' });
+//     }
+
+//     const mediaDocs = await Promise.all(
+//       req.files.map((file) =>
+//         Media.create({
+//           event,
+//           folder: folder || 'General',
+//           public_id: file.filename,
+//           secure_url: file.path,
+//           resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+//           price: price || 0,
+//           width: file.width,
+//           height: file.height,
+//           format: file.format,
+//         }),
+//       ),
+//     );
+
+//     res.status(201).json(mediaDocs);
+//   } catch {
+//     res.status(500).json({ error: 'Error subiendo media' });
+//   }
+// });
 
 // ===============================
 // GET media
