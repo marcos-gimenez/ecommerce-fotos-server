@@ -68,6 +68,36 @@
 //   });
 // }
 
+// import cloudinary from '../config/cloudinary.js';
+
+// export function getPreviewUrl(media) {
+//   return cloudinary.url(media.public_id, {
+//     resource_type: 'image',
+//     transformation: [
+//       // 1️⃣ Imagen base
+//       { width: 1200, crop: 'limit', quality: 'auto:eco' },
+
+//       // 2️⃣ Blur fuerte (preview protegida)
+//       { effect: 'blur:120' },
+
+//       // 3️⃣ Watermark ocupando todo el ancho
+//       {
+//         overlay: 'image:pampa_foto',
+//         width: '1.0',
+//         crop: 'scale',
+//         gravity: 'center',
+//         opacity: 40,        
+//       },      
+
+//       // 4️⃣ Aplicar overlay
+//       { flags: 'layer_apply' },
+
+//       // 5️⃣ Oscurecer levemente la imagen final
+//       { effect: 'brightness:-10' },
+//     ],
+//   });
+// }
+
 import cloudinary from '../config/cloudinary.js';
 
 export function getPreviewUrl(media) {
@@ -77,55 +107,22 @@ export function getPreviewUrl(media) {
       // 1️⃣ Imagen base
       { width: 1200, crop: 'limit', quality: 'auto:eco' },
 
-      // 2️⃣ Blur fuerte (preview protegida)
-      { effect: 'blur:100' },
+      // 2️⃣ Blur fuerte
+      { effect: 'blur:120' },
 
-      // // 3️⃣ Watermark ocupando todo el ancho
-      // {
-      //   overlay: 'image:watermark_pampa_foto',
-      //   width: 280,
-      //   crop: 'scale',
-      //   opacity: 35,
-        
-      // },
+      // 3️⃣ Watermark REAL (no dependiente de orientación)
+      {
+        overlay: 'image:pampa_foto',
+        width: 800,              // tamaño fijo, no relativo
+        crop: 'scale',
+        gravity: 'center',
+        opacity: 38,
+      },
+      { flags: 'layer_apply' },
 
-      
-
-      // // 4️⃣ Aplicar overlay
-      // { flags: 'layer_apply' },
-
-      // watermark centro
-{
-  overlay: 'image:watermark_pampa_foto',
-  width: 280,
-  crop: 'scale',
-  opacity: 30,
-  gravity: 'center',
-},
-{ flags: 'layer_apply' },
-
-// watermark arriba izquierda
-{
-  overlay: 'image:watermark_pampa_foto',
-  width: 220,
-  crop: 'scale',
-  opacity: 20,
-  gravity: 'north_west',
-},
-{ flags: 'layer_apply' },
-
-// watermark abajo derecha
-{
-  overlay: 'image:watermark_pampa_foto',
-  width: 220,
-  crop: 'scale',
-  opacity: 20,
-  gravity: 'south_east',
-},
-{ flags: 'layer_apply' },
-
-      // 5️⃣ Oscurecer levemente la imagen final
+      // 4️⃣ Oscurecer levemente
       { effect: 'brightness:-10' },
     ],
   });
 }
+
