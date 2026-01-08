@@ -89,9 +89,9 @@ export function getPreviewUrl(media) {
         // flags: 'tile',
       },
 
-      {
-        flags: 'tile',
-      },
+      // {
+      //   flags: 'tile',
+      // },
 
       // 4️⃣ Aplicar overlay
       { flags: 'layer_apply' },
