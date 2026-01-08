@@ -37,7 +37,7 @@ export function getPreviewUrl(media) {
     resource_type: isVideo ? 'video' : 'image',
     secure: true,
     transformation: [
-      // 1️⃣ Imagen base
+      // 1️⃣ Base
       {
         width: 1600,
         height: 1600,
@@ -45,7 +45,7 @@ export function getPreviewUrl(media) {
         quality: 'auto',
       },
 
-      // 2️⃣ Watermark en mosaico (NO se puede escapar)
+      // 2️⃣ Definís el overlay
       {
         overlay: {
           public_id: 'pampa_foto',
@@ -57,7 +57,12 @@ export function getPreviewUrl(media) {
         flags: 'tile',
       },
 
-      // 3️⃣ Ajuste sutil final
+      // 3️⃣ Aplicás el overlay (ESTO FALTABA)
+      {
+        flags: 'layer_apply',
+      },
+
+      // 4️⃣ Ajuste final
       { effect: 'brightness:-5' },
     ],
   });
