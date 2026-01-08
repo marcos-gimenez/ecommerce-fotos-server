@@ -140,11 +140,11 @@ export function getPreviewUrl(media) {
 
       // 3️⃣ Watermark FULL COVER (canvas 3000x3000)
       {
-        overlay: 'image:pampa_foto_1', // tu PNG 3000x3000
-        width: '1.2',               
+        overlay: 'image:pampa_foto_2', // tu PNG 3000x3000
+        width: '1.0',               
         crop: 'scale',
         gravity: 'center',
-        opacity: 38,
+        opacity: 50,
       },
       { flags: 'layer_apply' },
 
