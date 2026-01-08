@@ -73,7 +73,6 @@ import cloudinary from '../config/cloudinary.js';
 export function getPreviewUrl(media) {
   return cloudinary.url(media.public_id, {
     resource_type: 'image',
-    secure: true,
     transformation: [
       // 1️⃣ Imagen base
       { width: 1200, crop: 'limit', quality: 'auto:eco' },
@@ -81,16 +80,19 @@ export function getPreviewUrl(media) {
       // 2️⃣ Blur fuerte (preview protegida)
       { effect: 'blur:100' },
 
-      // 3️⃣ Watermark en mosaico (LEGACY, PERO ESTABLE)
+      // 3️⃣ Watermark ocupando todo el ancho
       {
-        overlay: 'image:pampa_foto',   // 👈 public_id SIMPLE
-        width: 300,              // tamaño del tile
+        overlay: 'image:watermark_pampa_foto',
+        width: 280,
         crop: 'scale',
-        opacity: 25,
-        flags: 'tile',           // 👈 ESTO ES LO ÚNICO NUEVO
+        opacity: 35,
+        flags: 'tile',
       },
 
-      // 4️⃣ Oscurecer levemente la imagen final
+      // 4️⃣ Aplicar overlay
+      { flags: 'layer_apply' },
+
+      // 5️⃣ Oscurecer levemente la imagen final
       { effect: 'brightness:-10' },
     ],
   });
