@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const EventSchema = new mongoose.Schema({
   title: { type: String, required: true },
   date: { type: Date, required: true },
-  code: { type: String, unique: true }, // código único opcional
+  code: { type: String }, // código único opcional
   description: String,
   coverImage: {
     type: String, // URL de Cloudinary
