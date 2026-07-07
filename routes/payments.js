@@ -78,9 +78,14 @@ router.post('/preference', async (req, res) => {
 
 router.post('/webhook', async (req, res) => {
   try {
-    // 🔔 Logs crudos (dejarlos hasta que todo funcione)
-    console.log('📩 Webhook RAW body:', JSON.stringify(req.body));
-    console.log('📩 Webhook RAW query:', req.query);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Webhook MP recibido', {
+        action: req.body?.action,
+        type: req.query.type,
+        topic: req.query.topic,
+        paymentId: req.query['data.id'] || req.body?.data?.id,
+      });
+    }
 
     // 1️⃣ Aceptar SOLO eventos de pago (prod + test)
     const isPaymentEvent =

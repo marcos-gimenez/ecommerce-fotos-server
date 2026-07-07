@@ -61,7 +61,17 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Orden no encontrada' });
     }
 
-    res.json(order);
+    res.json({
+      orderId: order._id,
+      status: order.status,
+      total: order.total,
+      createdAt: order.createdAt,
+      items: order.items.map(({ media, price }) => ({
+        id: media._id,
+        type: media.resource_type,
+        price,
+      })),
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener orden' });
   }

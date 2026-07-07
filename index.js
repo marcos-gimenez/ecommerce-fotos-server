@@ -14,7 +14,28 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONT_URL,
+  process.env.ADMIN_URL,
+].filter(Boolean);
+
+const localhostPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+
+    const isAllowedOrigin = allowedOrigins.includes(origin);
+    const isLocalhostDev =
+      process.env.NODE_ENV !== 'production' && localhostPattern.test(origin);
+
+    if (isAllowedOrigin || isLocalhostDev) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Origen no permitido por CORS'));
+  },
+}));
 app.use(express.json());
 
 // Rutas

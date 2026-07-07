@@ -209,7 +209,7 @@ router.get('/:id', async (req, res) => {
 // ===============================
 // PUT /api/events/:id/cover
 // ===============================
-router.put('/:id/cover', async (req, res) => {
+router.put('/:id/cover', authAdmin, async (req, res) => {
   try {
     const { coverImage } = req.body;
 
